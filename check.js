@@ -35,6 +35,41 @@ exports.wrap = function (obj) {
         },
         hasWordsCount: function (count) {
             return this.obj instanceof String && hasWordsCount(count, this.obj);
+        },
+        not: {
+            isNull: function () {
+                return this.obj !== null;
+            },
+            containsKeys: function (keys) {
+                return !((this.obj instanceof Object || this.obj instanceof Array) &&
+                    contains(keys, Object.keys(this.obj)));
+            },
+            hasKeys: function (keys) {
+                return !((this.obj instanceof Object || this.obj instanceof Array) &&
+                    has(keys, Object.keys(this.obj)));
+            },
+            containsValues: function (values) {
+                return !((this.obj instanceof Object || this.obj instanceof Array) &&
+                    contains(values, Object.values(this.obj)));
+            },
+            hasValues: function (values) {
+                return !((this.obj instanceof Object || this.obj instanceof Array) &&
+                    has(values, Object.values(this.obj)));
+            },
+            hasValueType: function (key, type) {
+                return !((this.obj instanceof Object || this.obj instanceof Array) &&
+                    hasValueType(key, type, this.obj));
+            },
+            hasParamsCount: function (count) {
+                return !(this.obj instanceof Function && hasLength(count, this.obj));
+            },
+            hasLength: function (length) {
+                return !((this.obj instanceof String || this.obj instanceof Array) &&
+                    hasLength(length, this.obj));
+            },
+            hasWordsCount: function (count) {
+                return !(this.obj instanceof String && hasWordsCount(count, this.obj));
+            }
         }
     };
 };
@@ -122,5 +157,5 @@ function hasLength(count, obj) {
 }
 
 function hasWordsCount(count, str) {
-    return str.split(/\s+/).length === count;
+    return str.split(/ +/).filter(word => Boolean(word.length)).length === count;
 }
