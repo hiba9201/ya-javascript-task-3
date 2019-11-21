@@ -2,73 +2,72 @@
 
 exports.wrap = function (obj) {
     return {
-        obj: obj,
         isNull: function () {
-            return this.obj === null;
+            return obj === null;
         },
         containsKeys: function (keys) {
-            return (this.obj instanceof Object || this.obj instanceof Array) &&
-                contains(keys, Object.keys(this.obj));
+            return (obj instanceof Object || obj instanceof Array) &&
+                contains(keys, Object.keys(obj));
         },
         hasKeys: function (keys) {
-            return (this.obj instanceof Object || this.obj instanceof Array) &&
-                has(keys, Object.keys(this.obj));
+            return (obj instanceof Object || obj instanceof Array) &&
+                has(keys, Object.keys(obj));
         },
         containsValues: function (values) {
-            return (this.obj instanceof Object || this.obj instanceof Array) &&
-                contains(values, Object.values(this.obj));
+            return (obj instanceof Object || obj instanceof Array) &&
+                contains(values, Object.values(obj));
         },
         hasValues: function (values) {
-            return (this.obj instanceof Object || this.obj instanceof Array) &&
-                has(values, Object.values(this.obj));
+            return (obj instanceof Object || obj instanceof Array) &&
+                has(values, Object.values(obj));
         },
         hasValueType: function (key, type) {
-            return (this.obj instanceof Object || this.obj instanceof Array) &&
-                hasValueType(key, type, this.obj);
+            return (obj instanceof Object || obj instanceof Array) &&
+                hasValueType(key, type, obj);
         },
         hasParamsCount: function (count) {
-            return this.obj instanceof Function && hasLength(count, this.obj);
+            return obj instanceof Function && hasLength(count, obj);
         },
         hasLength: function (length) {
-            return (this.obj instanceof String || this.obj instanceof Array) &&
-                hasLength(length, this.obj);
+            return (obj instanceof String || obj instanceof Array) &&
+                hasLength(length, obj);
         },
         hasWordsCount: function (count) {
-            return this.obj instanceof String && hasWordsCount(count, this.obj);
+            return obj instanceof String && hasWordsCount(count, obj);
         },
         not: {
-            isNull: function () {
-                return this.obj !== null;
+            isNull: () => {
+                return obj !== null;
             },
             containsKeys: function (keys) {
-                return !((this.obj instanceof Object || this.obj instanceof Array) &&
-                    contains(keys, Object.keys(this.obj)));
+                return !((obj instanceof Object || obj instanceof Array) &&
+                    contains(keys, Object.keys(obj)));
             },
             hasKeys: function (keys) {
-                return !((this.obj instanceof Object || this.obj instanceof Array) &&
-                    has(keys, Object.keys(this.obj)));
+                return !((obj instanceof Object || obj instanceof Array) &&
+                    has(keys, Object.keys(obj)));
             },
             containsValues: function (values) {
-                return !((this.obj instanceof Object || this.obj instanceof Array) &&
-                    contains(values, Object.values(this.obj)));
+                return !((obj instanceof Object || obj instanceof Array) &&
+                    contains(values, Object.values(obj)));
             },
             hasValues: function (values) {
-                return !((this.obj instanceof Object || this.obj instanceof Array) &&
-                    has(values, Object.values(this.obj)));
+                return !((obj instanceof Object || obj instanceof Array) &&
+                    has(values, Object.values(obj)));
             },
             hasValueType: function (key, type) {
-                return !((this.obj instanceof Object || this.obj instanceof Array) &&
-                    hasValueType(key, type, this.obj));
+                return !((obj instanceof Object || obj instanceof Array) &&
+                    hasValueType(key, type, obj));
             },
             hasParamsCount: function (count) {
-                return !(this.obj instanceof Function && hasLength(count, this.obj));
+                return !(obj instanceof Function && hasLength(count, obj));
             },
             hasLength: function (length) {
-                return !((this.obj instanceof String || this.obj instanceof Array) &&
-                    hasLength(length, this.obj));
+                return !((obj instanceof String || obj instanceof Array) &&
+                    hasLength(length, obj));
             },
             hasWordsCount: function (count) {
-                return !(this.obj instanceof String && hasWordsCount(count, this.obj));
+                return !(obj instanceof String && hasWordsCount(count, obj));
             }
         }
     };
@@ -141,7 +140,8 @@ function contains(contained, containing) {
     return contained.every(key => containing.includes(key));
 }
 function has(contained, containing) {
-    return containing.every(key => contained.includes(key));
+    return containing.every(key => contained.includes(key)) &&
+        contained.every(key => containing.includes(key));
 }
 function hasValueType(key, type, obj) {
     const availableTypes = [String, Number, Function, Array];
