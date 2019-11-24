@@ -1,150 +1,134 @@
 'use strict';
 
 exports.wrap = function (obj) {
-    return {
+    const check = {
         isNull: function () {
             return obj === null;
         },
         containsKeys: function (keys) {
-            return (obj instanceof Object || obj instanceof Array) &&
-                contains(keys, Object.keys(obj));
+            return checkObjTypes(obj, [Object, Array]) &&
+                contains(Object.keys(obj), keys);
         },
         hasKeys: function (keys) {
-            return (obj instanceof Object || obj instanceof Array) &&
-                has(keys, Object.keys(obj));
+            return checkObjTypes(obj, [Object, Array]) &&
+                has(Object.keys(obj), keys);
         },
         containsValues: function (values) {
-            return (obj instanceof Object || obj instanceof Array) &&
-                contains(values, Object.values(obj));
+            return checkObjTypes(obj, [Object, Array]) &&
+                contains(Object.values(obj), values);
         },
         hasValues: function (values) {
-            return (obj instanceof Object || obj instanceof Array) &&
-                has(values, Object.values(obj));
+            return checkObjTypes(obj, [Object, Array]) &&
+                has(Object.values(obj), values);
         },
         hasValueType: function (key, type) {
-            return (obj instanceof Object || obj instanceof Array) &&
-                hasValueType(key, type, obj);
+            return checkObjTypes(obj, [Object, Array]) &&
+                hasValueType(obj, key, type);
         },
         hasParamsCount: function (count) {
-            return obj instanceof Function && hasLength(count, obj);
+            return checkObjTypes(obj, [Function]) && checkLengthValue(obj, count);
         },
         hasLength: function (length) {
-            return (obj instanceof String || obj instanceof Array) &&
-                hasLength(length, obj);
+            return checkObjTypes(obj, [String, Array]) &&
+                checkLengthValue(obj, length);
         },
         hasWordsCount: function (count) {
-            return obj instanceof String && hasWordsCount(count, obj);
-        },
-        not: {
-            isNull: () => {
-                return obj !== null;
-            },
-            containsKeys: function (keys) {
-                return !((obj instanceof Object || obj instanceof Array) &&
-                    contains(keys, Object.keys(obj)));
-            },
-            hasKeys: function (keys) {
-                return !((obj instanceof Object || obj instanceof Array) &&
-                    has(keys, Object.keys(obj)));
-            },
-            containsValues: function (values) {
-                return !((obj instanceof Object || obj instanceof Array) &&
-                    contains(values, Object.values(obj)));
-            },
-            hasValues: function (values) {
-                return !((obj instanceof Object || obj instanceof Array) &&
-                    has(values, Object.values(obj)));
-            },
-            hasValueType: function (key, type) {
-                return !((obj instanceof Object || obj instanceof Array) &&
-                    hasValueType(key, type, obj));
-            },
-            hasParamsCount: function (count) {
-                return !(obj instanceof Function && hasLength(count, obj));
-            },
-            hasLength: function (length) {
-                return !((obj instanceof String || obj instanceof Array) &&
-                    hasLength(length, obj));
-            },
-            hasWordsCount: function (count) {
-                return !(obj instanceof String && hasWordsCount(count, obj));
-            }
+            return checkObjTypes(obj, [String]) && hasWordsCount(obj, count);
         }
     };
+    check.not = createNot(check);
+
+    return check;
 };
 
 exports.init = function () {
     Object.defineProperty(Object.prototype, 'check', {
         get: function () {
-            return {
-                containsKeys: (keys) => contains(keys, Object.keys(this)),
-                hasKeys: (keys) => has(keys, Object.keys(this)),
-                containsValues: (values) => contains(values, Object.values(this)),
-                hasValues: (values) => has(values, Object.values(this)),
-                hasValueType: (key, type) => hasValueType(key, type, this),
-                not: {
-                    containsKeys: (keys) => !contains(keys, Object.keys(this)),
-                    hasKeys: (keys) => !has(keys, Object.keys(this)),
-                    containsValues: (values) => !contains(values, Object.values(this)),
-                    hasValues: (values) => !has(values, Object.values(this)),
-                    hasValueType: (key, type) => !hasValueType(key, type, this)
-                }
+            const check = {
+                containsKeys: contains.bind(null, Object.keys(this)),
+                hasKeys: has.bind(null, Object.keys(this)),
+                containsValues: contains.bind(null, Object.values(this)),
+                hasValues: has.bind(null, Object.values(this)),
+                hasValueType: hasValueType.bind(null, this)
             };
+            check.not = createNot(check);
+
+            return check;
         }
     });
     Object.defineProperty(Function.prototype, 'check', {
         get: function () {
-            return {
-                hasParamsCount: count => hasLength(count, this),
-                not: {
-                    hasParamsCount: count => !hasLength(count, this)
-                }
+            const check = {
+                hasParamsCount: checkLengthValue.bind(null, this)
             };
+            check.not = createNot(check);
+
+            return check;
         }
     });
     Object.defineProperty(String.prototype, 'check', {
         get: function () {
-            return {
-                hasLength: (length) => hasLength(length, this),
-                hasWordsCount: count => hasWordsCount(count, this),
-                not: {
-                    hasLength: (length) => !hasLength(length, this),
-                    hasWordsCount: count => !hasWordsCount(count, this)
-                }
+            const check = {
+                hasLength: checkLengthValue.bind(null, this),
+                hasWordsCount: hasWordsCount.bind(null, this)
             };
+            check.not = createNot(check);
+
+            return check;
         }
     });
     Object.defineProperty(Array.prototype, 'check', {
         get: function () {
-            return {
-                hasLength: (length) => hasLength(length, this),
-                containsKeys: (keys) => contains(keys, Object.keys(this)),
-                hasKeys: (keys) => has(keys, Object.keys(this)),
-                containsValues: (values) => contains(values, Object.values(this)),
-                hasValues: (values) => has(values, Object.values(this)),
-                hasValueType: (key, type) => hasValueType(key, type, this),
-                not: {
-                    hasLength: (length) => !hasLength(length, this),
-                    containsKeys: (keys) => !contains(keys, Object.keys(this)),
-                    hasKeys: (keys) => !has(keys, Object.keys(this)),
-                    containsValues: (values) => !contains(values, Object.values(this)),
-                    hasValues: (values) => !has(values, Object.values(this)),
-                    hasValueType: (key, type) => !hasValueType(key, type, this)
-                }
+            const check = {
+                hasLength: checkLengthValue.bind(null, this),
+                containsKeys: contains.bind(null, Object.keys(this)),
+                hasKeys: has.bind(null, Object.keys(this)),
+                containsValues: contains.bind(null, Object.values(this)),
+                hasValues: has.bind(null, Object.values(this)),
+                hasValueType: hasValueType.bind(null, this)
             };
+            check.not = createNot(check);
+
+            return check;
         }
     });
 };
 
-function contains(contained, containing) {
+const availableTypes = [String, Number, Function, Array];
+
+function checkObjTypes(obj, types) {
+    for (const type of types) {
+        if (obj instanceof type) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function negotiate(predicate, ...args) {
+    return !predicate(...args);
+}
+
+function createNot(obj) {
+    const newObj = {};
+    Object.keys(obj).forEach(key => {
+        newObj[key] = negotiate.bind(null, obj[key]);
+    });
+
+    return newObj;
+}
+
+function contains(containing, contained) {
     return contained.every(key => containing.includes(key));
 }
-function has(contained, containing) {
+
+function has(containing, contained) {
     return containing.every(key => contained.includes(key)) &&
         contained.every(key => containing.includes(key));
 }
-function hasValueType(key, type, obj) {
-    const availableTypes = [String, Number, Function, Array];
+
+function hasValueType(obj, key, type) {
     if (!availableTypes.includes(type)) {
         throw new TypeError('Given type is not supported!');
     }
@@ -152,10 +136,10 @@ function hasValueType(key, type, obj) {
     return Object.keys(obj).includes(key) && obj[key].constructor === type;
 }
 
-function hasLength(count, obj) {
+function checkLengthValue(obj, count) {
     return obj.length === count;
 }
 
-function hasWordsCount(count, str) {
-    return str.split(/ +/).filter(word => Boolean(word.length)).length === count;
+function hasWordsCount(str, count) {
+    return str.split(' ').filter(Boolean).length === count;
 }
